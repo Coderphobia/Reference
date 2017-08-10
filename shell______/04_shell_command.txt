@@ -1,0 +1,694 @@
+第4节： shell 脚本常用命令使用技巧
+
+----------------------------------------------------------------------------------
+cat命令
+
+1.例出文件内容
+[root@teacher shell]# cat 1.sh
+
+-n 显示行号
+-s 不输出多行空行
+-T 将跳格字符显示为^I
+
+2.合并文件的内容
+[root@teacher shell]# cat 1.sh 2.sh > 3.sh
+
+3.配合<<在脚本中进行格式输出
+#!/bin/bash
+cat <<EOF
+   ###############
+   #     ^ ^     #
+   #      -      #
+   ###############
+EOF
+
+cat > file.txt << eof
+
+[root@teacher shell]# echo "Test stdin"|cat - file.txt
+
+对于-的使用技巧：
+
+# tar -zcf - test01 |tar -zxf - -C /tmp
+
+----------------------------------------------------------------------------------
+
+head命令
+[root@teacher shell]# head /etc/passwd
+-c,  --bytes=[-]K	显示每个文件的前K 字节内容；
+			如果附加"-"参数，则除了每个文件的最后K字节数据外
+			显示剩余全部内容
+  -n, --lines=[-]K	显示每个文件的前K 行内容；
+			如果附加"-"参数，则除了每个文件的最后K 行外显示
+			剩余全部内容
+  -q, --quiet, --silent	不显示包含给定文件名的文件头
+  -v, --verbose		总是显示包含给定文件名的文件头
+
+[root@teacher shell]# cat -n /etc/passwd |head -n 5
+[root@teacher shell]# cat -n /etc/passwd |head -n -5
+[root@teacher shell]# cat -n /etc/passwd |head -n 5 |tac
+
+----------------------------------------------------------------------------------
+tail命令
+
+[root@teacher shell]# cat -n /etc/passwd |tail
+
+-c, --bytes=K		输出最后K 字节；另外，使用-c +K 从每个文件的
+			第K 字节输出
+  -f, --follow[={name|descriptor}]
+		即时输出文件变化后追加的数据。
+-n, --lines=K 
+
+[root@teacher shell]# cat -n /etc/passwd |tail -n ＋5
+[root@teacher shell]# tail -f 1.sh 
+
+----------------------------------------------------------------------------------
+find 命令
+find命令选项非常多，详请参考man find
+find [-H] [-L] [-P] [-D debugopts] [-Olevel] [path...] [expression]
+
+-P     Never follow symbolic links. default
+-L     Follow  symbolic links.  跟踪目录的链接
+-H     Do not follow symbolic links, except  while  processing  the
+              command line arguments.
+
+-P -L -H 是用来控制符号连接的处理
+
+find /path 不加任何条件时，结果会显示出/path目录下的所有文件，与ls不同的是，find的结果带有路径。
+
+[root@teacher ~]# find  /var/mail
+/var/mail
+[root@teacher ~]# find -L /var/mail
+/var/mail
+/var/mail/chuyue
+/var/mail/rpc
+
+
+OPTIONS ：  查找选项
+-mindepth   最小的搜索的目录深度
+-maxdepth   最大的搜索的目录深度
+[root@teacher shell]# find  .   -name 1.sh 
+./1/2/3/1.sh
+./1/2/1.sh
+./1.sh
+[root@teacher shell]# find  . -maxdepth 1  -name 1.sh 
+./1.sh
+[root@teacher shell]# find  . -maxdepth 2  -name 1.sh 
+./1.sh
+[root@teacher shell]# find  . -maxdepth 3  -name 1.sh 
+./1/2/1.sh
+./1.sh
+
+ TESTS ：  查找条件
+       +n     for greater than n, 大于n
+
+       -n     for less than n,  小于n
+
+       n      for exactly n.  匹配n
+
+-amin n    文件在n分钟之前被访问过 
+-atime n   文件在n天之前被访问过  （当n=0，指的是1天之内，当n=1,指的是1天（24h）以前2天之内，当n=+1,指的是大于1天之前的所有。
+-cmin n
+-ctime n   文件在n天之前属性被修改过
+-mmin n    
+-mtime n  文件内容n天之前被修改过 
+
+
+-newer file
+-anewer file
+-cnewer file
+通过修改时间，访问时间，属性修改时间来和file进行比较更新的文件。
+
+-empty  查找空文件
+-executable 查找可执行文件
+-fstype type 指定查找的文件系统类型
+
+-uid n
+-gid n
+通过用户uid  组gid查找文件
+
+find / -fstype ext4 -gid 500
+
+-user uname
+-group gname
+通过用户名和组名去查找
+
+-nouser
+-nogroup
+查找没有用户和组的文件
+
+
+
+-name   通过名字查找
+-iname
+
+-lname
+-ilname
+通过链接名查找
+
+其中i开头的选项表示忽略文件名中的大小写，下面的类似。
+
+-inum n
+-samefile name
+通过比较inode来查找相同的文件。
+
+
+-regex pattern   通过正则表达式去匹配文件名，这个匹配是要包含整个路径的，而不仅仅是匹配文件名。
+-iregex pattern
+
+-links n 根据文件的链接数查找
+-lname pattern 通过名字查找链接
+
+-wholename pattern
+-iwholename pattern
+-path pattern 通过路径去查找
+
+-perm mode  通过权限去查找
+-perm -mode
+-perm /mode
+－perm +mode　（等同于/mode，　过时的选项）
+
+-readable
+-writable
+
+
+-size n[cwbkMG] 
+通过文件东西查找。可以使用（n +n -n）
+
+
+-type c
+通过文件类型去查找
+-xtype c
+结果中包含链接文件
+
+［root@teacher 1]# find /dev/ -type b -ls
+［root@teacher 1]# find /dev/ -xtype b -ls
+
+ -context pattern
+通过SELINUX上下文查找
+
+
+ACTIONS ： 查找到匹配项后的操作
+
+-delete  删除  一定要使用匹配条件，并不能和-prune一起使用，自动打开－depth
+
+
+-exec command ; 执行命令
+[root@teacher 1]# find /etc  -name grub* -exec basename {} \;  > 1.txt
+
+-exec command {} +
+-execdir command ;
+-execdir command {} +
+
+-ok command ; 每次询问
+-okdir command ;
+
+-print  将匹配到的结果打印到屏幕，并使用换行，默认操作。
+-print0 将匹配到的结果打印到屏幕，并使用null字符替代换行。可以配合xargs
+-printf format
+
+-ls  将匹配到的文件用ls -l 方式列出。
+
+-fls file 将列出的内容写入到一个文件
+-fprint file  同上，区别是这个只打印文件名，没有ls -l。
+
+-fprint0 file
+-fprintf file format
+
+-prune  查找过程中搜索到的文件是一个目录，那么不进入该目录查找。当使用depth失效，也不和delete一起使用
+-quit
+
+
+
+find .  \(-name "*.txt" -o -name "*.pdf" \)
+find . -type f -name "*.swp" -delete
+find . -type f -user root -exec chown webuser {} \;
+find path -type f -name "*.mp3" -exec mv {} target_dir \;
+find /tmp -name core -type f -print | xargs /bin/rm -f
+
+xargs命令
+将标准输入转换成其他命令的命令行参数
+
+举例：
+[root@teacher 1]# cat test.txt 
+1234
+2 3 4 
+5678
+9 1
+
+[root@teacher 1]# cat test.txt |xargs
+1234 2 3 4 5678 9 1
+
+[root@teacher 1]# cat test.txt |xargs -n 3
+1234 2 3
+4 5678 9
+1
+
+[root@teacher 1]# echo "123x456x789x9876" |xargs -d "x" -n 2
+123 456
+789 9876
+
+调试：
+
+[root@teacher 1]# cat arg.sh
+#!/bin/bash
+echo "$*"'#'
+
+[root@teacher 1]# ./arg.sh arg1
+arg1#
+[root@teacher 1]# ./arg.sh arg1 arg2
+arg1 arg2#
+[root@teacher 1]# ./arg.sh arg1 arg2 arg3
+arg1 arg2 arg3#
+
+[root@teacher 1]# cat arg.txt 
+arg1
+arg2
+arg3
+
+
+[root@teacher 1]# cat arg.txt |xargs ./arg.sh 
+arg1 arg2 arg3#
+
+[root@teacher 1]# cat arg.txt |xargs -n 1 ./arg.sh 
+arg1#
+arg2#
+arg3#
+
+[root@teacher 1]# ls |cp /tmp
+cp: 在"/tmp" 后缺少了要操作的目标文件
+请尝试执行"cp --help"来获取更多信息。
+
+[root@teacher 1]# ls |xargs -I {}  cp  {} /tmp
+
+{}可以是自定义的任意字符。
+
+主要用来和find命令进行配合。详见find的示例。
+
+----------------------------------------------------------------------------------
+tr命令
+从标准输入中替换或缩减和/或删除字符，并将结果写到标准输出。
+tr [选项]... ste1 [ste2]
+
+基本用法举例：
+
+[root@teacher 1]# echo abc|tr 'a-z' 'A-Z'
+ABC
+
+[root@teacher 1]# echo abc|tr 'abc' '12'
+122
+
+[root@teacher 1]# echo abc|tr 'abc' '1'
+111
+
+
+[root@teacher 1]# echo abc|tr 'abc' '12345'
+123
+
+[root@teacher 1]# echo abc|tr 'a' '12345'
+1bc
+[root@teacher 1]# echo abc|tr 'ab' '12345'
+12c
+[root@teacher 1]# echo abc|tr 'abcde' '12345'
+123
+[root@teacher 1]# echo abc|tr 'bcde' '12345'
+a12
+
+[root@foundation0 shells]# echo abc  | tr  'acb' '123'
+132
+
+选项：
+  -c, -C, --complement		首先保留SET1
+  -d, --delete			删除匹配SET1 的内容，并不作替换
+  -s, --squeeze-repeats	如果匹配于SET1 的字符在输入序列中存在连续的重复，在替换时会被统一缩为一个字符的长度
+  -t, --truncate-set1		先将SET1 的长度截为和SET2 相等
+
+[root@teacher 1]# echo abc|tr -c 'bcde' '12345'
+5bc5
+解释：bcde 和1234匹配替换，而加了-c， bc会保留下来，a和\n被替换为5，得到结果5bc5
+
+[root@teacher 1]# echo "hello 1 char 2 next 4"|tr -d -c '0-9 \n'
+ 1  2  4
+
+[root@teacher 1]# echo abc | tr -d 'b'
+ac
+
+[root@teacher 1]# echo "aaabacdcc" |tr -s 'abc'
+abacdc
+[root@teacher 1]# echo "aaabacdcc" |tr -s 'abc' '123'
+1213d3
+
+[root@teacher 1]# echo "aaabacdcc" |tr -t 'abcd' '123'
+111213d33
+
+思考：
+cat sum.txt
+1
+2
+32
+24
+5
+16
+
+使用tr命令计算出它们的和。
+[root@teacher 1]# cat sum.txt |echo $((`tr '\n' '+'`0))
+[root@teacher 1]# cat sum.txt |echo $[ $(tr '\n' '+') 0 ]
+
+tr 可以使用字符类
+比如：
+  \NNN	八进制值为NNN 的字符(1 至3 个数位)
+  \\		反斜杠
+  \a		终端鸣响
+  \b		退格
+  \f		换页
+  \n		换行
+  \r		回车
+  \t		水平制表符
+  \v		垂直制表符
+  字符1-字符2	从字符1 到字符2 的升序递增过程中经历的所有字符
+  [字符*]	在SET2 中适用，指定字符会被连续复制直到吻合SET1 的长度
+  [字符*次数]	对字符执行指定次数的复制，若次数以 0 开头则被视为八进制数
+  [:alnum:]	所有的字母和数字
+  [:alpha:]	所有的字母
+  [:blank:]	所有呈水平排列的空白字符
+  [:cntrl:]	所有的控制字符
+  [:digit:]	所有的数字
+  [:graph:]	所有的可打印字符，不包括空格
+  [:lower:]	所有的小写字母
+  [:print:]	所有的可打印字符，包括空格
+  [:punct:]	所有的标点字符
+  [:space:]	所有呈水平或垂直排列的空白字符
+  [:upper:]	所有的大写字母
+  [:xdigit:]	所有的十六进制数
+  [=字符=]	所有和指定字符相等的字符
+
+仅在SET1 和SET2 都给出，同时没有-d 选项的时候才会进行替换。
+仅在替换时才可能用到-t 选项。如果需要SET2 将被通过在末尾添加原来的末字符的方式
+补充到同SET1 等长。SET2 中多余的字符将被省略。只有[:lower:] 和[:upper:]
+以升序展开字符；在用于替换时的SET2 中以成对表示大小写转换。-s 作用于SET1，既不
+替换也不删除，否则在替换或展开后使用SET2 缩减。
+
+----------------------------------------------------------------------------------
+cut命令
+基本用法举例
+[root@teacher 1]# cat /etc/passwd |cut -b 5   -b字节，意思是截取第五个字节。
+[root@teacher 1]# cat /etc/passwd |cut -b 1-5      截取前五个字节。
+ 
+用法：cut [选项]... [文件]...
+从每个文件中输出指定部分到标准输出。
+
+长选项必须使用的参数对于短选项时也是必需使用的。
+  -b, --bytes=列表		只选中指定的这些字节
+  -c, --characters=列表		只选中指定的这些字符
+  -d, --delimiter=分界符	使用指定分界符代替制表符作为区域分界
+  -f, --fields=LIST       select only these fields;  also print any line
+                            that contains no delimiter character, unless
+                            the -s option is specified
+   意思是仅选择这些领域;同时打印不包含分隔符的任何行，除非指定了-s选项
+
+  -n                      with -b: don't split multibyte characters
+      --complement		补全选中的字节、字符或域
+  -s, --only-delimited		不打印没有包含分界符的行
+      --output-delimiter=字符串	使用指定的字符串作为输出分界符，默认采用输入的分界符
+      --help		显示此帮助信息并退出
+      --version		显示版本信息并退出
+
+仅使用f -b, -c 或-f 中的一个。每一个列表都是专门为一个类别作出的，或者您可以用逗号隔
+开要同时显示的不同类别。您的输入顺序将作为读取顺序，每个仅能输入一次。
+每种参数格式表示范围如下：
+    N	从第1 个开始数的第N 个字节、字符或域
+    N-	从第N 个开始到所在行结束的所有字符、字节或域
+    N-M	从第N 个开始到第M 个之间(包括第M 个)的所有字符、字节或域
+    -M	从第1 个开始到第M 个之间(包括第M 个)的所有字符、字节或域
+
+当没有文件参数，或者文件不存在时，从标准输入读取
+
+[root@teacher 1]# head -3  /etc/passwd |cut -d ":" -f 1   取第一个领域
+root
+bin
+daemon
+[root@teacher 1]# head -3  /etc/passwd |cut -d ":" -f 2
+x
+x
+x
+[root@foundation9 shell]# head -3  /etc/passwd |cut ":"  -f 1,3   取第一，三个领域
+root:0
+bin:1
+daemon:2
+[root@teacher 1]# head -3  /etc/passwd |cut -d ":" -f 1-3  取一到三个领域
+root:x:0 
+bin:x:1
+daemon:x:2
+
+
+[root@teacher 1]# cat 1.txt 
+1243 456 78 ab
+ab cc 687 cc
+abcdef
+cc aa cc
+aa cc
+[root@teacher 1]# cat 1.txt |cut -d " " -f 4
+ab
+cc
+abcdef  因为abcdef没有分界符空格，所以也打印出来了。
+
+
+[root@teacher 1]# cat 1.txt |cut -d " " -f 4 -s   -s不打印没有包含分界符的行
+ab
+cc
+
+----------------------------------------------------------------------------------
+sort命令
+基本用户示例：
+[root@teacher 1]# cat sum.txt 
+1
+2
+32
+24
+5
+16
+[root@teacher 1]# cat sum.txt |sort
+1
+16
+2
+24
+32
+5
+[root@teacher 1]# cat sum.txt |sort -n
+1
+2
+5
+16
+24
+32
+
+用法：sort [选项]... [文件]...
+　或：sort [选项]... --files0-from=F
+串联排序所有指定文件并将结果写到标准输出。
+
+长选项必须使用的参数对于短选项时也是必需使用的。
+排序选项：
+
+  -b, --ignore-leading-blanks	忽略前导的空白区域
+  -f, --ignore-case		忽略字母大小写
+  -g, --general-numeric-sort	按照常规数值排序
+  -i, --ignore-nonprinting	只排序可打印字符
+  -M, --month-sort		比较 (未知) < "一月" < ... < "十二月"
+  -h, --human-numeric-sort    使用易读性数字(例如： 2K 1G)
+  -n, --numeric-sort		根据字符串数值比较
+  -R, --random-sort		根据随机hash 排序
+      --random-source=文件	从指定文件中获得随机字节
+  -r, --reverse			逆序输出排序结果
+      --sort=WORD		按照WORD 指定的格式排序：
+					一般数字-g，高可读性-h，月份-M，数字-n，
+					随机-R，版本-V
+  -V, --version-sort		在文本内进行自然版本排序
+
+ -k, --key=位置1[,位置2]	在位置1 开始一个key，在位置2 终止(默认为行尾)
+  -o, --output=文件		将结果写入到文件而非标准输出
+  -t, --field-separator=分隔符	使用指定的分隔符代替非空格到空格的转换
+  -u, --unique		配合-c，严格校验排序；不配合-c，则只输出一次排序结果
+  -z, --zero-terminated	以0 字节而非新行作为行尾标志
+
+[root@teacher 1]# cat /etc/passwd |cut -d":" -f1,3|sort -t ":" -k 2 -n 
+[root@teacher 1]# cat /etc/passwd |cut -d":" -f7|sort -u
+/bin/bash
+/bin/sync
+/sbin/halt
+/sbin/nologin
+/sbin/shutdown
+
+----------------------------------------------------------------------------------
+uniq命令
+去重
+[root@teacher 1]# cat /etc/passwd |cut -d":" -f7|sort|uniq -c|sort -nr
+     31 /sbin/nologin
+      2 /bin/bash
+      1 /sbin/shutdown
+      1 /sbin/halt
+      1 /bin/sync
+
+用法：uniq [选项]... [文件]
+从输入文件或者标准输入中筛选相邻的匹配行并写入到输出文件或标准输出。
+
+不附加任何选项时匹配行将在首次出现处被合并。
+
+长选项必须使用的参数对于短选项时也是必需使用的。
+  -c, --count		在每行前加上表示相应行目出现次数的前缀编号
+  -d, --repeated	只输出重复的行
+  -D, --all-repeated[=delimit-method	显示所有重复的行
+			delimit-method={none(default),prepend,separate}
+			以空行为界限
+  -f, --skip-fields=N	比较时跳过前N 列
+  -i, --ignore-case	在比较的时候不区分大小写
+  -s, --skip-chars=N	比较时跳过前N 个字符
+  -u, --unique		只显示唯一的行
+  -z, --zero-terminated	使用'\0'作为行结束符，而不是新换行
+  -w, --check-chars=N	对每行第N 个字符以后的内容不作对照
+      --help		显示此帮助信息并退出
+      --version		显示版本信息并退出
+提示：uniq 不会检查重复的行，除非它们是相邻的行。
+
+----------------------------------------------------------------------------------
+wc命令
+用法：wc [选项]... [文件]...
+　或：wc [选项]... --files0-from=F
+输出每个指定文件的行数、单词计数和字节数，如果指定了
+多于一个文件，继续给出所有相关数据的总计。如果没有指定
+文件，或者文件为"-"，则从标准输入读取数据。
+  -c, --bytes		输出字节数统计
+  -m, --chars		输出字符数统计
+  -l, --lines		输出行数统计
+      --files0-from=文件	从指定文件读取以NUL 终止的名称，如果该文件被
+					指定为"-"则从标准输入读文件名
+  -L, --max-line-length	显示最长行的长度
+  -w, --words			显示单词计数
+
+[root@teacher 1]# cat /etc/passwd |wc -l
+36
+----------------------------------------------------------------------------------
+grep命令
+基本用法示例：
+
+[root@teacher 1]# cat /etc/passwd |grep "root"
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+用法: grep [选项]... PATTERN [FILE]...
+在每个 FILE 或是标准输入中查找 PATTERN。
+默认的 PATTERN 是一个基本正则表达式(缩写为 BRE)。
+例如: grep -i 'hello world' menu.h main.c
+
+当PATTERN使用正则表达式的时候，要用单引号。
+例：
+[root@teacher 1]# cat /etc/passwd |grep '^root'
+root:x:0:0:root:/root:/bin/bash
+[root@teacher 1]# cat /etc/passwd |grep '\<bin\>'
+正则表达式详见下一节内容。
+
+正则表达式选择与解释:
+-E, --extended-regexp     PATTERN 是一个可扩展的正则表达式(缩写为 ERE)
+-F, --fixed-strings       PATTERN 是一组由断行符分隔的定长字符串。
+-e, --regexp=PATTERN      用 PATTERN 来进行匹配操作
+-f, --file=FILE           从 FILE 中取得 PATTERN
+-i, --ignore-case         忽略大小写
+-w, --word-regexp         强制 PATTERN 仅完全匹配字词
+-x, --line-regexp         强制 PATTERN 仅完全匹配一行
+-z, --null-data           一个 0 字节的数据行，但不是空行
+
+Miscellaneous:
+-s, --no-messages  不显示错误信息
+-v, --invert-match 取反
+
+
+Output control:
+-m, --max-count=NUM  达到NUM次匹配时停止
+-n, --line-number  显示行号
+-H, --with-filename  显示匹配结果的文件名
+-h, --no-filename 不显示匹配结果的文件名
+-o, --only-matching 显示匹配的PATTERN
+-q, --quiet, --silent 安静模式，没有任何一般输出
+-a, --text --binary-files=text
+-d, --directories=ACTION 如何操作目录，ACTION is `read', `recurse', or `skip'
+-D, --devices=ACTION 如何操作设备
+-R, -r, --recursive   目录递归，等同于 --directories=recurse
+--include=FILE_PATTERN  只匹配表达式表示的文件
+--exclude=FILE_PATTERN  排除表达式表示的文件
+--exclude-from=FILE  从文件读取要排除的文件或目录 
+--exclude-dir=PATTERN 从表达式获取要排除的目录
+-L, --files-without-match  打印出内容不匹配的文件名
+-l, --files-with-matches   打印出内容匹配的文件名
+-c, --count 打印出每个文件匹配到内容的次数
+-Z, --null  print 0 byte after FILE name
+
+Context control:
+-B, --before-context=NUM 打印出匹配内容行前NUM行
+-A, --after-context=NUM  打印出匹配内容行后NUM行
+-C, --context=NUM 打印出多少行
+--color[=WHEN],  颜色高亮显示
+--colour[=WHEN]       use markers to highlight the matching strings;
+                            WHEN is `always', `never', or `auto'
+
+‘egrep’即‘grep -E’。‘fgrep’即‘grep -F’。
+
+举例：
+[root@teacher shell]# grep -l 'hostname' /etc/*
+
+[root@teacher 1]# grep  'root' /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+[root@teacher 1]# grep -e 'root' /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+[root@teacher 1]# grep -e  'root' -e 'chuyue' /etc/passwd
+chuyue:x:500:500:chuyue:/home/chuyue:/bin/bash
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+
+[root@teacher 1]# grep -q 'root' /etc/passwd
+[root@teacher 1]# echo $?
+0
+[root@teacher 1]# grep -q 'rootxx' /etc/passwd
+[root@teacher 1]# echo $?
+1
+
+[root@teacher 1]# grep -c 'root' /etc/passwd
+2
+
+[root@teacher 1]# grep -w 'bin' /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+chuyue:x:500:500:chuyue:/home/chuyue:/bin/bash
+
+
+[root@teacher 1]# grep -R -i  -H 'ServerName' /etc
+
+练习：
+1.查看指定的文件/etc/logrotate.conf内容，不显示注释行和空白行;   grep
+[root@foundation0 shells]# grep -v  "^#"  /etc/logrotate.conf |grep  -v "^$"
+或
+[root@foundation0 shells]# grep -v -e  "^#" -e "^$"  /etc/logrotate.conf
+或
+[root@foundation0 shells]# grep -vE  '^($|#)'  /etc/logrotate.conf
+
+2.统计文本中的词频（比如统计man_db.conf文件中哪个单词使用的次数最多）（tr）
+
+[root@foundation0 shells]# cat  /etc/man_db.conf |tr  '[:space:][:punct:]'  '\n'|grep -v "^$"|sort|uniq  -c  |sort -nr |head -1
+     38 man
+
+
+3.分析web日志（httpd，squid，ngnix日志)，找出访问最频繁的客户端IP; （cut）
+
+[root@foundation0 shells]# cut -d " "  -f 1  webtest.access.log |sort |uniq -c |sort -nr |head -n 3
+   7138 221.238.22.137
+   3922 61.147.92.115
+   2486 112.90.141.121
+
+4.编写脚本，找出/usr/share/dict/words系统词典中最长的单词。（wc）
+04.sh
+05.sh
+
+5. 写个脚本找出系统中用户的ＵＩＤ在１００－２００之间的用户名和其ＵＩＤ,按顺序排列 （sort）
+03.sh
+

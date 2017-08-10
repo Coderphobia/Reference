@@ -1,0 +1,117 @@
+使用awk处理awk02-txt.txt的数据：
+The database contains the names, phone numbers, and money contributions
+to the party campaign for the past three months.
+   1. Print all the phone numbers.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '{print $2}
+
+   2. Print Dan's phone number.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '/Dan/{print $2}'
+
+
+   3. Print Susan's name and phone number.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '/Susan/{print $1,$2}'
+
+   4. Print all last names beginning with D.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '/\ D/{print $0}'
+
+[kiosk@foundation0 07_example]$ cat awk02-txt.txt  |awk -F '[ :]' '$2 ~ /^D/{print $2}'
+
+   5. Print all first names beginning with either a C or E.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '/^[CE]/{print $0}'
+[kiosk@foundation0 07_example]$ cat awk02-txt.txt |awk '/^[CE]/{print $1}'
+
+   6. Print all first names containing only four characters.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '/^....\ /{print $0}'
+or
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" --posix  '/^.{4}\ /{print $0}'
+
+   7. Print the first names of all those in the 916 area code.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk  '/(916)/{print $1}'
+
+   8. Print Mike's campaign contributions. Each value should be printed 
+      with a leading dollar sign; e.g., $250 $100 $175.
+
+[root@qianyun awk_exercise]# awk -F ":" '$1~/^Mike/{print "$"$3,"$"$4,"$"$5}'  awk02-txt.txt
+
+   9. Print last names followed by a comma and the first name.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk  '{print $1","$2,$3}'
+
+
+   10.Write an awk script called facts that
+         a. Prints full names and phone numbers for the Savages.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '/Savage/{print $1,$2}'
+
+         b. Prints Chet's contributions.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '/Chet/{print $3,$4,$5}'
+
+         c. Prints all those who contributed $250 the first month.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '$3==250{print $1}'
+
+
+使用awk处理以上的数据：
+The database contains the names, phone numbers, and money contributions
+to the party campaign for the past three months.
+   1. Print the first and last names of those who contributed more than
+      $100 in the second month.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '$4>=100{print $1}'
+
+
+   2. Print the names and phone numbers of those who contributed less than
+      $85 in the last month.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '$5<85{print $1,$2}'
+
+   3. Print the names of those who contributed between $75 and $150 in
+      the first month.
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '$3>=75 && $3<=150{print $1}
+
+
+   4. Print the names of those who contributed less than $800 over the
+      three-month period.
+[root@qianyun awk_exercise]# awk -F ":"  '($3+$4+$5)<800{print $1}'  awk02-txt.txt 
+
+   5. Print the names and addresses of those with an average monthly
+      contribution greater than $200.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '($3+$4+$5)/3>=200{print $1}'
+
+   6. Print the first name of those not in the 916 area code.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '!/(916)/{print $1}'
+
+
+
+   7. Print each record preceded by the number of the record.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk '{print NR,$0}'
+
+
+   8. Print the name and total contribution of each person.
+
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '{print $1,$3+$4+$5}'
+
+
+   9. Add $10 to Chet's second contribution.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" '/Chet/{print $1,$2,$3,$4+10,$5}'
+
+
+   10.Change Nancy McNeil's name to Louise McInnes.
+
+[root@qianyun awk_exercise]# cat awk02-txt.txt |awk -F":" 'BEGIN{OFS=":"}/Nancy McNeil/{print "Louise McInnes",$2,$3,$4,$5}'
+
+

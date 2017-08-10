@@ -1,0 +1,164 @@
+脚本的综合训练与实践
+
+一.　系统状态检测类
+
+Ｑ:检查磁盘分区的使用量，如果某个分区的使用量超过85%，则发警告邮件给管理员。
+Ａ: chkdisk.sh
+
+
+类似：　　检查服务器的内存使用量，一但发现内存使用量超８５％，则发警告邮件给管理员。
+
+
+
+
+Ｑ：　删除指定目录内超过30天未被修改过的文件，但要排除某一些特定的文件（比如文件名是以.bak结尾）；
+
+
+find.sh
+
+
+Ｑ：写一个终端闹钟脚本。能够在后台运行，在指定时间点持续发出声音，能够使用选项终止闹钟。（提示：使用echo -e "\a" 发声，使用kill or pkill等结束进程）
+
+ring.sh
+
+
+Ｑ：　监控网站能否正常访问，不能则邮件警告(Ｌinux下命令行的http浏览器：　curl　lynx w3m elinks)
+
+chekweb.sh
+
+Ｑ:　查找网站当中的无效链接;  （curl －I）
+
+find_broken_url.sh
+
+
+Ｑ：　写一个脚本跟踪网页源代码的变更，如果网页发生了改变，则发送邮件警告。(可以在本地监控一个文件夹的文件内容来模拟) (mtime 或者 md5 或者 diff)
+
+diff.sh
+
+
+Ｑ：　在指定的目录中，如果发现.sh结尾的文件,就给它可执行的权限.
+
+perm.sh
+
+
+
+
+
+
+Ｑ：　写一个脚本，去定时的抓取路由器的公网接口的公网IP（ADSL拔号），如果该ip发生变化，用邮件通知管理员。
+
+pub_ip.sh
+
+
+Ｑ：　写一个脚本监控系统CPU、内存、硬盘、网络的负载，生成日志报告。(top uptime ps free df fdisk netstat iptables iostat)
+
+sysinfo.sh
+
+
+二.　自动化操作
+
+
+Q: 文件批量改名(tr　mv rename)
+1. 在每个文件的后面添加统一扩展名（比如.txt）;
+2. 按文件被修改的时间为文件添加序列号，（比如，最早被修改的文件名应该被修改为1_filename.txt；
+3. 将所有文件的文件名大小写替换（大写替换成小写）；
+4. 将file1，file2 …… file50 改为file01,file02 ... file50
+
+
+
+Q: 编写针对某个应用的日志切割脚本。
+说明:测试时可以写个脚本使用logger模拟应用持续产生日志，提示生产使用中，优先考虑使用logrotate,如果logrotate不能满足需求，则使用mv脚本的方式. 
+1.先写一个脚本,用logger命令持续产生日志到指定的文件/var/log/test.log.
+2.针对上面脚本产生的日志进行切割,要求每10s钟切割一次,保留3个备份,备份的日志名为test.log.01  test.log.02  test.log.03
+
+logger.sh  logx.sh
+
+
+Q: 写一个脚本，要求将目录中所有图片（扩展名是.jpg或者.png或.bmp，名字随机）的名字改成image-01.jpg .. png bmp
+
+说明: 有下列文件abc.jpg  tt.png xy.jpg  012.jpg  66.png cc.bmp  12b.bmp 456.png  yum.bmp cc.jpg 12b.png
+批量改名成image-01.jpg ... image-04.jpg  image-01.png ... image-04.png  image-01.bmp ... image-03.bmp
+01...04的顺序是由图片的创建(修改)时间的先后顺序来决定.
+
+img_rename.sh
+
+
+Q: 自动同步两个目录 (rsync)
+
+rsync.sh
+
+
+Q: 批量添加samba用户
+要求：
+a.添加的用户是来自于一个文件username.txt，文件格式： (while read awk)
+
+序号   姓名    工号    身份证号   标记
+
+b.添加这个用户时为其分配samba的使用权限，samba的用户名为"工号",密码为"身份证号"; (smbpasswd or pdbedit)
+c.用户不能登录系统; (nologin)
+d.自动为用户分配根分区的磁盘配额; (setquota)
+e.能判断用户是否存在，如果存在给出提示并记录日志; (grep /etc/passwd)
+f.用户添加信息有明确的输出信息，统计成功添加了多少个,有多少个因为存在冲突而没有添加的信息。 (let n++)
+
+
+smb.sh
+
+
+4.2.系统初始化（使用交互式）(selete while case)
+4.2.1.询问是否校正时间和时区；
+4.2.2 询问是否设置运行级别，默认为3
+4.2.3.询问是否配置静态IP，默认为动态获取
+4.2.4.询问是否配置主机名，默认为ServerX(X为IP地址（C类）主机位)
+4.2.5.询问是否关闭IPv6，关闭iptables , 关闭selinux （默认为关闭IPv6，开启iptables使用默认规则，开启selinux。）
+
+4.3. 非交互式
+任务如下：
+校对时间,时区　（ntp）
+更新系统　（yum）
+设置sysctl参数 (cat或sed)
+ssh安全加固　（sed 比如禁用root　ＤＮＳ，不需要的认证方式，更改端口，监听地址等...）
+配制防火墙  (iptables)
+禁用IPV6　(rhel５和rhel６不同)
+优化服务　　（chkconfig server off ;service server stop）
+
+三.文件备份　
+
+
+2. 文件自动备份脚本：　（find　tar）
+2.1.每天进行一次增量备份，每月进行一次全备；
+2.2.备份文件打包压缩，备份目录文件名有备份的时间后缀；
+2.3.记录备份过程日志并发送邮件给管理员；
+2.4.自动删除旧的备份文件，只保留当前的备份和之前一次的备份。
+2.5.将备份文件上传至远程备份主机目录。（可选FTP）
+
+back_file.sh
+
+
+
+四.爬虫抓取
+
+Q: 写一个脚本，去抓取指定网站页面上的所有的图片（或者邮箱地址）。
+写一个脚本，下载指定页面的所有图片; (<img> src=http://.... 注意引用src使用绝对还是相对路径，使用正则提取出网址后用wget 或curl下载）
+
+img_downloader.sh
+
+
+五.　安全分析
+Q: 编写防火墙的脚本
+
+iptables
+
+ssh防暴力破解的安全小脚本：
+定时分析/var/log/secure(或wtmp)登录日志信息，尝试登录的次数超过一定值时，将客户端IP写到/etc/hosts.deny文件中，格式: sshd:121.9.205.97
+
+ssh-deny.sh
+
+六.　批量管理
+
+自动生成ssh密钥对，批量上传公钥到多台ssh server. (expect)
+
+ssh-key.sh
+
+集群初始化脚本
+
+hainit.sh

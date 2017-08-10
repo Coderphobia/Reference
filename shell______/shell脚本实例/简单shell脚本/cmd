@@ -1,0 +1,71 @@
+#!/bin/bash
+#自行用shell脚本编写一个命令cmd，当你输入cmd -t的时候，显示当前的时间，-c 显示当前月的日历（cal），－i 显示IP地址，-v 显示命令的版本; -h, 显示命令的帮助文档（cat << EOF）。
+
+ver="0.1"
+
+usage(){
+	cat  <<EOF
+         -t            Display  current time.
+	 -c            Display  current cal.
+         -i            Display  ip  address .
+	 -v            .....
+         -h            .....
+EOF
+}
+
+opt(){
+	echo "Options  too much . Just one."
+	exit 21
+}
+
+NotUse(){
+
+[ "$#"  -eq  1 ] || opt
+
+case  $1 in 
+	-t)
+	  date ;;
+	-c)
+	  cal ;;
+	-i)
+	  ip  addr show ;; 
+	-v)
+	  echo  "Version :$ver" ;;
+	-h)
+	  usage ;;
+	*)
+	  echo "Option unknow." 
+          usage
+	;;
+esac
+}
+
+#增加点难度，多个选项混合使用呢。
+
+
+opt_err(){
+	echo "Must use  options."
+	usage
+	exit 20
+}
+
+[ $# -lt  1  ]  &&  opt_err
+for  i in  "$@"
+  do
+    case  $i  in 
+	-t)
+	  date ;;
+	-c)
+	  cal ;;
+	-i)
+	  ip  addr show ;; 
+	-v)
+	  echo  "Version :$ver" ;;
+	-h)
+	  usage ;;
+	*)
+	  echo "$i Option unknow." 
+          usage
+	;;
+   esac
+  done

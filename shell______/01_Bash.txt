@@ -1,0 +1,67 @@
+1. 什么是shell脚本？
+系统命令＋变量＋函数＋正则表达式＋流程控制＋终端输入输出＝自动批量处理系统任务
+
+------------------------------------------------------------------------------------------------------
+2. Shell脚本的通用格式
+#!/bin/bash                      //  申明是在bash环境下执行的脚本
+# some comment                   //  写明一些注释，方便以后调试，阅读，与他人协作。理解代码
+var1=value1                      //  定义变量
+var2=value2
+fun(){                           //  定义函数
+    cmd0                  
+}
+shell keyword                    //  Bash的关键字，比如if   for   while ......
+cmd1                             //  通过关键字组合起来的Bash的命令
+cmd2
+cmd3
+
+在Linux下推荐使用vim编辑器编写脚本；
+给脚本赋予可执行的权限：
+chmod +x example.sh
+
+示例：
+[root@localhost shell]# vim example.sh
+#!/bin/bash
+# This is a test script.
+# huangdaojin
+# 2015-08-12
+# v0.1
+cd /boot/
+ls
+cd -
+
+[root@localhost shell]# chmod +x example.sh
+
+------------------------------------------------------------------------------------------------------
+3. 脚本执行的方式
+1） ./example.sh   =  /path/example.sh
+2） sh example.sh  = bash example.sh
+3）  .   example.sh
+4）  source example.sh
+
+说明：
+方式1，2 会打开一个BASH的子进程来进行执行。（一定需要执行权限）
+方式3，4 会在当前BASH环境中执行。 (不需要执行权限)
+
+大多数情况，使用第1，2种方式执行； 当脚本的工作任务就是初始化当前的shell环境时，使用第3，4种。
+
+问题：
+为什么不能像系统命令如ls , mount 直接用[root@localhost shell]# example.sh 这样方式执行。
+原因：系统的命令都是放在bin 或 sbin 目录下的可执行程序，而这些放系统命令的目录系统通过一个环境变量PATH来搜索。
+[root@localhost shell]# echo $PATH
+/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/root/bin
+
+如果需要将一个shell脚本变成一个系统命令，处理方式：
+1. 将example.sh 复制到PATH定义的目录中的任一目录;
+2. 将example.sh所在的目录/shell加入到PATH变量中去。（推荐）
+[root@localhost shell]# PATH=$PATH:/shell
+[root@localhost shell]# export PATH
+
+如果需要永久保存/shell目录的PATH变量中，则需要将PATH=$PATH:/shell写到
+bash_profile
+------------------------------------------------------------------------------------------------------
+4. 调试脚本
+1）sh -xv script.sh (常用)
+2）在脚本中使用set -x 和set +x来限定调试的范围
+3）使用#!/bin/bash -xv
+

@@ -1,0 +1,461 @@
+1. awk简介
+
+awk是一种编程语言，用于在linux/unix下对文本和数据进行处理。数据可以来自标准输入、一个或多个文件，或其它命令的输出。它支持用户自定义函数和动态正则表达式等先进功能，是linux/unix下的一个强大编程工具。它在命令行中使用，但更多是作为脚本来使用。awk的处理文本和数据的方式是这样的，它逐行扫描文件，从第一行到最后一行，寻找匹配的特定模式的行，并在这些行上进行你想要的操作。如果没有指定处理动作，则把匹配的行显示到标准输出(屏幕)，如果没有指定模式，则所有被操作所指定的行都被处理。awk分别代表其作者姓氏的第一个字母。因为它的作者是三个人，分别是Alfred Aho、Peter Weinberger、Brian  Kernighan。gawk是awk的GNU版本，它提供了Bell实验室和GNU的一些扩展。下面介绍的awk是以GUN的gawk为例的，在linux系统中已把awk链接到gawk，所以下面全部以awk进行介绍。
+
+AWK的功能是什么？与sed和grep很相似，awk是一种样式扫描与处理工具。但其功能却大大强于sed和grep。 awk提供了极其强大的功能：它几乎可以完成grep和sed所能完成的全部工作，同时，它还可以可以进行样式装入、流控制、数学运算符、进程控制语句甚至于内置的变量和函数。它具备了一个完整的语言所应具有的几乎所有精美特性。实际上，awk的确拥有自己的语言：awk程序设计语言，awk的三位创建者已将它正式定义为：样式扫描和处理语言。
+
+2. awk用法
+
+awk [POSIX or GNU 风格选项] [ -- ] '程序文本' 文件 ...
+
+awk [POSIX or GNU 风格选项] -f '程序文件'  [ -- ]  文件 ...
+
+示例：
+[root@localhost ~]# awk  '/root/{print $0}' /etc/passwd
+
+3. awk选项
+-F fs or --field-separator fs
+指定输入文件折分隔符，fs是一个字符串或者是一个正则表达式，如-F:。（FS与定义变量的值） *
+
+-v var=value or --asign var=value
+在程序开始执行前赋值一个用户定义变量。在BEGIN块中可用。 *
+
+-f program-file or --file program-file
+从脚本文件中读取awk程序。
+
+-mf NNN and -mr NNN
+设置各种内在限制为NNN，-mf选项限制最大的字段数；-mr选项限制最大记录数。这两个功能是Bell实验室版awk的扩展功能，在标准awk中不适用。（gawk忽略）
+
+-O  or --optimize
+启用优化后的程序内部表示。
+
+-W compat or --compat, -W traditional or --traditional
+在兼容模式下运行awk。所以gawk的行为和标准的awk完全一样，所有的awk扩展都被忽略。  *
+
+-W copyleft or --copyleft, -W copyright or --copyright
+打印简短的版权信息。
+
+-W dump-variables[=file] or --dump-variables[=file]
+打印全局变量，以及它们的类型、值的排序列表到一个文件。（在用比较长的awk程序是避免变量冲突）
+
+-W exec file or --exec file
+类似于-f，不过它是最后被处理的。它应该用在#！脚本，尤其是CGI应用，避免在命令行从URL传递选项和源码（！）。这个选项禁止命令行变量赋值。
+
+-W gen-po or  --gen-po
+扫描和分析awk程序，并在标准输出生成一个GNU .po格式的文件。程序本身不执行。
+
+
+-W help or --help, -W usage or --usage
+打印全部awk选项和每个选项的简短说明。
+
+-W lint[=value] or --lint[=value]
+提供关于可疑或不能移植到其他AWK实现的结构的警告。
+
+-W lint-old or --lint-old
+打印关于不能向传统unix awk 移植的结构的警告。  
+
+ -W non-decimal-data or --non-decimal-data
+认识八进制和十六进制值输入数据。使用此选项时非常谨慎！
+
+-W posix or --posix
+打开兼容模式。但有以下限制：
+不识别：\x 转义序列。
+当FS被设置为一个空格时只有空格和制表符作为分隔符，换行符不行。
+在？和：后不能继续行。
+不识别关键字function的代名词func。
+操作符**和**=不能代替^和^=。
+fflush（）函数无效。    *
+
+-W profile[=prof file] or --profile[=prof file]
+
+-W re-interval or --re-inerval
+允许间隔正则表达式的使用，参考(grep中的Posix字符类)，如r{n,m}。  *
+
+-W source program-text or --source program-text
+使用program-text作为源代码，可与-f命令混用。
+
+-W use-lc-numeric   or  --use-lc-numeric
+这迫使awk来解析输入数据时使用的本地环境小数点字符。
+
+-W version or --version
+打印bug报告信息的版本。
+
+-- 
+选项结尾的信号。在AWK程序以-开始时有用。
+
+4. AWK程序执行
+ pattern   { action statements }
+ function name(parameter list) { statements }
+
+ AWK程序由一个序列的模式操作语句和可选的函数定义组成。
+ 
+ 5. VARIABLES, RECORDS AND FIELDS
+ AWK的变量是动态的，当他们在第一次使用时被定义。变量值可以是浮点数或（和）字符串，AWK也有一维数组，模拟多维数组。在程序运行时有一些预定义变量被设置。
+ 
+ 通常，记录被换行符分隔。可以使用内建的变量RS来控制记录的分隔符。（行）
+ 
+ 每读取一个记录，gawk使用FS变量定义的分隔符来分隔字段。(列）
+ 
+ 
+ 5. 内建变量（Built-in Variables）  （R记录指行，F字段指列）
+ 
+ 变量	描述  
+
+ARGC		命令行参数的数目。
+ARGIND		当前被处理的文件的ARGV的index(从0开始算)。
+ARGV		包含命令行参数的数组。
+BINMODE 	在non-POSIX系统中，文件的I/O指定使用"binary"模式。
+CONVFMT		数字转换格式(默认值为%.6g)
+ENVIRON		当前环境变量关联数组。
+ERRNO		包含一个描述错误信息的字符串。
+FIELDWIDTHS	字段宽度列表(用空格键分隔)。设置以后匹配字段宽度而不是以FS分隔。 ＊
+FILENAME	当前输入的文件名。   ＊
+FNR		当前输入文件的记录号数值。  即当前所在的行 ＊
+FS		字段分隔符(默认是任何空格)。  ＊
+IGNORECASE	控制所有正则表达式和字符串操作的大小写敏感性（若值为非零，则忽略大小写匹配，初始值为0）。
+LINT		从AWK程序内部提供--lint选项的动态控制。（若为真，打印lint警告）
+NF		当前输入记录中的字段数。  ＊
+NR		到目前为止看到的输入记录的总数。  ＊
+OFMT		数字的输出格式(默认值是%.6g)。
+OFS		输出字段分隔符(默认值是一个空格)。  ＊
+ORS		输出记录分隔符(默认值是一个换行符)。 ＊
+PROCINFO	这个数组的元素提供正在运行的AWK程序信息。可用（PROCINFO["egid"] PROCINFO["euid"] PROCINFO["FS"] PROCINFO["gid"] PROCINFO["pgrpid"] PROCINFO["pid"]  PROCINFO["ppid"]  PROCINFO["uid"] PROCINFO["version"]  ）
+RS		记录分隔符(默认是一个换行符)。  ＊
+RT		记录终止符（gawk使用RS的值）
+RSTART		由match()函数匹配到的第一个字符索引。（若无匹配则为0）
+RLENGTH		由match（）函数所匹配的字符串的长度。（若无匹配为－1）
+SUBSEP		多个数组元素下标分隔符(默认值是\034)。
+TEXTDOMAIN	AWK程序的文本域。用来查找程序的字符串本地化翻译。
+
+
+[demo@teacher ~]$ echo "123456" |awk -v FIELDWIDTHS="3 2" '{print $1,$2}'
+123 45               FIELDWIDTHS	字段宽度列表(用空格键分隔)
+[demo@teacher ~]$ echo "123456" |awk -v FIELDWIDTHS="3 3" '{print $1,$2}'
+123 456
+[demo@teacher ~]$ echo "123456" |awk -v FIELDWIDTHS="2 99999" '{print $1,$2}'
+12 3456
+
+
+
+6.数组
+
+7.变量类型和转换
+
+8.八进制和十六进制常量
+
+9.字符串常量
+字符串常量在AWK中使用双引号。
+\\  反斜杠
+\a  警报
+\b  退格
+\f  换页符
+\n  换行符
+\r  回车符
+\t  水平制表符
+\v  垂直制表符
+\xhex digits   \x后面的字符代表十六进制数字 （如\x1B是ASCII ESC字符）
+\ddd	代表八进制数字 （如\033是ASCII ESC字符）
+\c   代表字面字符c
+
+10.PATTERNS AND ACTIONS （模式和行为）
+AWK是一个行处理程序，匹配到PATTERNS，则进行ACTIONS，ACTIONS永久在｛ ｝中。可以缺少PATTERNS，也可以缺少ACTIONS，但不能都没有。如果PATTERNS丢失，则ACTIONS处理每一行，若ACTIONS丢失，则ACTION等同于｛print}，即打印整个记录。
+
+以＃开头注释一行。空白行可用作单独的语句。通常，一个语句以换行符结束，然而，以", { ? : && ||" 结束的行并非如此。还有do ,else有他们自己的语法自动到下一行。其他情况下，可以使用\来忽略换行符。
+
+多个语句可以放在一行用；号隔开。
+
+PATTERNS
+
+BEGIN
+END
+BEGIN和END是两个特殊的模式，它不是用来针对输入的测试。如果所有的语句写在一个BEGIN块里面，则所有BEGIN模式的ACTION会被合并，并在输入被读取之前执行。同样的，所有的END块也会被合并，在所有输入结束时执行（或者在有exit语句执行时）。BEGIN和END模式不能和模式表达式里面的模式联合。BEGIN和END模式必须有ACTION部分。
+
+/regular expression/
+对每一行匹配正则表达式，类似于egrep的用法。 awk在使用正则表达式的时候，特殊字符不需要\脱意。
+
+relational expression
+关系表达式，可以使用运算符进行操作，通常用来比较正则表达式或（和）字符串（数字）之间的比较。
+
+pattern && pattern
+逻辑与AND
+
+pattern || pattern
+逻辑或OR
+
+pattern ? pattern : pattern
+如果第一个pattern为真，则使用第二个pattern来匹配，否则使用第三个。
+
+(pattern)
+边界界定。
+
+! pattern
+逻辑取反NOT
+
+pattern1, pattern2
+定义一个范围。
+
+11.正则表达式
+
+
+c		匹配元字符c
+\c		匹配字面字符c
+. 		匹配任何单个字符串(包括换行符)
+^		匹配以一个字符串开头
+$		匹配以一个字符串结尾
+[abc...]	字符列表，匹配abc...中的任一字符
+[^abc...]	取反字符列表，匹配除了abc...的任一字符
+r1|r2		交替：匹配r1或者r2
+r1r2		串联：匹配r1以及r2
+r＋		匹配一个以上的r
+r＊		匹配零个以上的r
+r？		匹配零个或一个r
+(r)		组：匹配r
+
+r{n} r{n,} r{n,m} 间隔型表达式，表示r重复的次数，只有在--posix或--re－interval在命令行指定时有效。
+
+
+\y		匹配一个单词开头或者末尾的空字符串。
+\B		匹配单词内的空字符串。
+\<		匹配一个单词的开头的空字符串，锚定开始。
+\>		匹配一个单词的末尾的空字符串，锚定末尾。
+\w		匹配由字母,数字或下划线组成的字符串。
+\W		匹配不是由字母，数字或下划线组成的字符串。
+\‘		匹配缓冲区（字符串）开头的一个空字符串。
+\'		匹配缓冲区末尾的一个空字符串。
+
+
+[:alnum:]	字母和数字
+[:alpha:]	字母
+[:blank:]	空格和tab
+[:cntrl:]	控制字符
+[:digit:]	数字
+[:graph:]	可打印且可见字符
+[:lower:]	小写字母
+[:print:]	可打印字符（不是指控制字符）
+[:punct:]	标点符号（非字母，数字，控制字符或空白字符）
+[:space:]	空白字符（比如空格，tab，换页符等）
+[:upper:]	大写字母
+[:xdigit:]	十六进制数
+字符类只在中括号中才有效。
+/[A-Za-z-0-9]/==>/[[:alnum:]]/
+
+整理符号（Collating Symbols）
+等价类 （Equivalence Classes）
+使用在非英语环境，gawk不识别（只识别POSIX字符类）
+
+gawk通过各种命令行选项控制怎样在正则表达式中解释字符。
+
+没有选项
+	默认，gawk提供所有POSIX正则表达式和GNU正则表达式，但不支持间格表达式。  ＊
+--posix
+	只有POSIX正则表达式被支持，GNU则不支持（\w被解释为w），间格表达式必允许。
+--traditional
+	传统的UNIX AWK 正则表达式匹配。GNU，间隔，POSIX字符类不支持，八进制和十六进制被转义成字面字符。
+--re-interval
+	允许间隔字符，即使使用了--traditional。  ＊
+
+12. 操作行为（ACTIONS）
+	操作语句位于｛ ｝内。操作语句包含常见的任务，条件，循环等语句。
+
+13. 运算符（Operators）
+	（...）	组
+	$	字段引用
+	++ --	自加和自减
+	^	求幂 （**  **=）
+	+ - !	加号，减号，逻辑否
+	* / %	乘，除，取余
+	+ -	加法，减法
+	space	字符串连接
+	|  |&	getline,print,printf 的I/O管道
+	< >
+	<= >=
+	!= ==
+		常规关系运算符
+	~ !~	正则表达式匹配，取反匹配。（不要在其左边使用常量正则表达式（/foo/））,只能是右边。
+		/foo/ ~ exp 等同于(($0 ~ /foo/) ~ exp)
+	in	数组成员
+	&&	逻辑与
+	||	逻辑或
+	?:	C语言条件表达式。来自于expr1?expr2:expr3
+	= += -=
+	*= /= %= ^=
+		运算形式缩写规则
+
+14. 控制语句
+              if (condition) statement [ else statement ]
+              while (condition) statement
+              do statement while (condition)
+              for (expr1; expr2; expr3) statement
+              for (var in array) statement
+              break
+              continue
+              delete array[index]
+              delete array
+              exit [ expression ]
+              { statements }
+	
+15. 输入/输出语句
+	
+close(file [, how])		关闭文件，管道或者是co-process。how选项只能用在当关闭一个co-process的双向管道，值为“to”或者“from”
+getline				设置$0从下一个输入记录;设置NF，NR，FNR。	＊
+getline <file 			设置$0从file的下一个记录;设置NF。
+getline var			设置var从下一个输入记录;设置NR，FNR。
+getline var <file		设置var从file的下一个记录。
+command | getline [var]		从管道(命令的标准输出)获取$0或var
+command |& getline [var]	从管道(命令以co-process方式的标准输出)获取$0或var
+next 				停止处理当前的输入记录。读取下一个输入记录和开始处理第一个模式。如果输入记录读取完成，则执行END块（如果有） ＊
+nextfile			停止处理当前的输入文件。下一个输入记录来自下一个输入文件。FILENMAE和ARGIND被更新，FNR被重设为1，AWK开始处理第一个模式。。如果输入记录读取完成，则执行END块（如果有）
+print				打印当前的记录。打印终止符为ORS变量的值。  ＊
+print expr-list			打印表达式。每个表达式迎OFS的值分隔。ORS结束。
+print expr-list >file 		打印表达式到文件file.
+printf fmt, expr-list		格式化并打印。
+printf fmt, expr-list >file	格式化并打印到文件
+system(cmd-line)		执行命令行命令并返回退出状态（在no-POSIX系统可能不能用）。 *
+fflush([file])			刷新任何输出文件或管道文件相关的缓存。
+
+
+print和printf的区别：print可以直接换行，而printf不可以直接换行，需要加\n.
+print和printf允许额外的输出重定向
+
+print ... >> file		追加到文件
+print ... | command		写入管道
+print ... |& command		发送数据到co-process 或 socket
+
+getline命令成功返回1，文件结束返回0，错误返回－1.ERRNO包含描述错误问题的字符串。
+
+NOTE：如果在一个循环里到getline, 或者从print,printf 使用管道，co-process,socket ，必须使用close()创建一个命令和socket新的实例。AWK不能自动关闭pipes,sockets,co-process,当他们返回EOF时。
+
+printf 语句
+
+%c
+%d,%i
+%e,%E
+%f,%F
+%g,%G
+%o
+%u
+%s
+%x,%X
+%%
+
+count$
+-
+space
++
+#
+0
+width
+.prec
+
+16.特殊文件名
+/dev/stdin
+/dev/stdout
+/dev/stderr
+/dev/fd/n
+/inet/tcp/lport/rhost/rport
+/inet/udp/lport/rhost/rport
+/inet/raw/lport/rhost/rport
+/dev/pid
+/dev/ppid
+/dev/pgrpid
+/dev/user
+
+
+17. 数值函数
+atan2(y,x)
+cos(expr)
+exp(expr)
+int(expr)
+log(expr)
+rand()
+sin()
+sqrt()
+srand([expr])
+
+18. 字符串函数
+asort(s [,d])
+asorti(s [,d])
+gensub(r,s,h [,t])
+gsub(r,s [,t])
+index(s,t)
+length([S])
+match(s,r[,a])
+split(s, a [, r])
+sprintf(fmt, expr-list)
+strtonum(str)
+sub(r, s [, t])
+substr(s, i [, n]) 
+tolower(str) 
+toupper(str) 
+
+19.时间函数
+mktime(datespec)
+strftime([format [, timestamp[, utc-flag]]])
+systime()
+
+
+20.位操作函数
+and(v1, v2)
+compl(val)
+lshift(val, count)
+or(v1, v2) 
+rshift(val, count) 
+xor(v1, v2) 
+
+21.国际化函数
+bindtextdomain(directory [, domain])
+dcgettext(string [, domain [, category]])
+dcngettext(string1 , string2 , number [, domain [, category]])
+
+22.用户定义函数
+ function name(parameter list) { statements }
+
+23.动态加载新函数
+ extension(object, function)
+
+23.信号
+pgawk接受两种信号。
+SIGUSR1
+SIGHUP
+
+24.举例
+
+       打印和排序所有用户的登录名:
+
+            BEGIN     { FS = ":" }
+                 { print $1 | "sort" }
+
+       统计文件的行数:
+
+                 { nlines++ }
+            END  { print nlines }
+
+       在文件的每行前面添加行号：
+
+            { print FNR, $0 }
+
+       连接和行号 (上一个例子的变化):
+
+            { print NR, $0 }
+       从数据的特定行运行一个特定的命令:
+
+            tail -f access_log |
+            awk ’/myhome.html/ { system("nmap " $1 ">> logdir/myhome.html") }’
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

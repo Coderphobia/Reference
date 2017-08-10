@@ -1,0 +1,56 @@
+对sed01.txt作如下操作：
+用 sed 实现
+      1. Change the name Jon to Jonathan.
+          [root@foundation9 shell]# cat sed01.txt |sed -n 's/Jon/Jonathan/gp'
+
+
+      2. Delete the first three lines.
+
+
+      3. Print lines 5 through 10.
+[root@foundation9 shell]# cat -n sed01.txt |sed -n  '5,10p'
+
+
+      4. Delete lines containing Lane.
+
+[root@foundation9 shell]# cat -n sed01.txt |sed   '/Lane/d'
+
+      5. Print all lines where the birthdays are in November or December.
+[root@foundation9 shell]# cat  sed01.txt |sed -n   '/:1[12]\//p'
+
+
+      6. Append three asterisks(3个星号) to the end of lines starting with Fred.
+
+[root@foundation9 shell]# cat  sed01.txt |sed  '/^Fred/a  ***'
+
+       7. Replace the line containing Jose with JOSE HAS RETIRED.
+
+[root@foundation9 shell]# cat  sed01.txt |sed -n 's/Jose/JOSE HAS RETIRED/p'
+
+       8. Change Popeye's birthday to 11/14/46. Assume you don't know
+       Popeye's original birthday. Use a regular expression to search for
+       it.
+
+cat sed01.txt |grep Popeye |sed 's/[1-9]\{1,\}\/[0-9]\{1,\}\/[1-9]\{1,\}/11\/14\/16/'
+
+       9. Delete all blank lines.
+
+
+       10. 
+       a. Insert above the first line the title PERSONNEL FILE.
+
+[root@foundation9 shell]# cat sed01.txt |sed '1i \\t\t\t\t   PERSONNEL FILE'
+
+       b. Remove the salaries ending in 500.
+
+[root@foundation9 shell]# cat -n sed01.txt |sed '/[0-9]\{1,\}500$/d'
+
+       c. Print the contents of the file with the last names and first names
+       reversed.
+
+
+
+       d. Append at the end of the file THE END.
+
+
+

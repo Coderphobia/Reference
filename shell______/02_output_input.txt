@@ -1,0 +1,329 @@
+1. 终端打印输出
+
+1) echo 用法：
+
+[root@localhost shell]# echo "Welcome"
+Welcome
+ 
+[root@localhost shell]# echo "123" ; echo "456"
+123
+456
+ 
+[root@localhost shell]# echo -n  "123" ; echo "456"
+123456
+ 
+[root@localhost shell]# echo -e  "123\t456\n789\t222" 
+123    456
+789    222
+[root@localhost shell]# echo -e  "123\t456"; echo -e "654\t321"
+123    456
+654    321
+ 
+[root@localhost shell]#  echo "$PWD"
+/home/chuyue
+[root@localhost shell]#  echo '$PWD'
+$PWD
+
+[root@localhost shell]#  echo "hello world !"
+bash: !": event not found
+[root@localhost shell]# echo 'hello world !'
+hello world !
+[root@localhost shell]# echo hello\ world\ !
+hello world ! 
+
+[root@localhost shell]# echo -e "\e[1;34m char \e[0m"
+char  
+[root@localhost shell]# echo -e "\e[1;44m char \e[0m"
+char 
+[root@localhost shell]# echo -e "\e[1;44m \e[1;31m char \e[0m"
+char 
+
+
+2）printf的用法：
+[root@localhost shell]# vim  2.sh
+#!/bin/bash
+printf "%5s %-10s %-4s\n" num name source
+printf  "%5s %-10s %-4.2f\n" 1 zhangsan 95.679
+printf  "%5s %-10s %-4.2f\n" 2 lisi 98.787
+printf  "%5s %-10s %-4.2f\n" 3 wangwu 87.334
+
+ [root@localhost shell]#  ./2.sh
+  num name       source
+    1 zhangsan    95.68
+    2 lisi        98.79
+    3 wangwu      87.33
+
+------------------------------------------------------------------------------------------------------    
+2. Shell的变量
+1）变量的类型：
+环境变量（全局变量）
+自定义变量
+预定义变量
+
+
+
+示例：
+环境变量
+[chuyue@teacher ~]$ env 
+
+[root@teacher ~]# echo $PATH
+/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
+[root@teacher ~]# PATH="$PATH:/shell"
+[root@teacher ~]# echo $PATH
+/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin:/shell
+
+2）自定义变量
+
+变量赋值
+
+shell中变量不需要声明，可直接使用。但是在自定义变量名的时候，要避免变量名冲突（和环境变量或预定义变量或命令冲突）
+
+[root@teacher ~]# var="123456"
+[root@teacher ~]# echo $var
+123456
+
+默认情况下，定义的变量不会在子shell进程继承
+[root@teacher ~]# bash
+[root@teacher ~]# echo $var
+ 
+[root@teacher ~]# export var="abcdefg"
+设置为当前BASH的子shell进程中可以继承 (非真正的全局变量，只能够向下继承)。
+ 
+[root@teacher ~]# echo $var
+abcdefg
+[root@teacher ~]# bash
+[root@teacher ~]# echo $var
+abcdefg
+
+3）输出变量值
+[chuyue@365linux ~]$ a=123;b=456
+[chuyue@365linux ~]$ echo $ab
+
+[chuyue@365linux ~]$ echo $a$b
+123456
+[chuyue@365linux ~]$ echo ${a}b
+123b
+[chuyue@365linux ~]$ echo "$a"b
+123b
+[chuyue@365linux ~]$ echo $a\b
+123b
+[chuyue@365linux ~]$ echo $a'b'
+123b
+ 
+[root@teacher ~]# echo $var
+abcdefg
+[root@teacher ~]# echo ${#var}
+7
+
+4) 数组：
+[root@teacher ~]# var=(a b c d e f)  ＃设置数组变量的值为a  b  c  d e f 五个值； 没有指定索引，默认索引为01234
+[root@teacher ~]# echo $var
+a
+输出变量$var，得到默认第一个变量值 ，也就是索引为0的值。
+
+[root@teacher ~]# echo ${var[0]}
+a
+
+[root@teacher ~]# echo ${var[1]}
+b
+
+[root@teacher ~]# echo ${var[2]}
+c
+
+
+[root@teacher ~]# echo ${var[*]}
+a b c d e f
+
+[root@teacher ~]# echo ${#var[*]}
+6
+
+
+[root@qianyun 02_example]# a[0]=windows
+[root@qianyun 02_example]# a[1]=linux
+[root@qianyun 02_example]# echo ${a[0]}
+windows
+[root@qianyun 02_example]# echo ${a[1]}
+linux
+[root@qianyun 02_example]# echo ${a[*]}
+windows linux
+
+
+关联数组，可以自定义索引
+[root@teacher ~]# declare -A fruits_value
+[root@teacher ~]# fruits_value=([apple]='100dollars' [orange]='200dollars')
+[root@teacher ~]# echo "apple costs ${fruits_value[apple]}"
+apple costs 100dollars
+ 
+[root@teacher ~]#  echo ${!fruits_value[*]}
+orange apple
+
+
+5）预定义变量(实际上是一种全局变量，专为可执行的程序或脚本设计,变量值随脚本执行的情况而自动变化)
+
+$0 $1 $2 $3 .....
+脚本本身 脚本的第一个参数  脚本的第二个参数  脚本的第三参数  。。。。。。
+
+$# 
+脚本的参数的总个数
+
+$*  $@
+列出脚本的所有参数
+两者的区别：
+$*列出所有的参数作为一个整体输出
+$@列出所有的参数是一个一个单独输出
+
+$$
+PID 
+
+$?
+脚本执行后的返回值
+
+示例：
+#!/bin/bash
+echo -e  "$0"  "\tThis is value of \$0"
+echo -e  "$1"  "\tThis is value of \$1"
+echo -e  "$2"  "\tThis is value of \$2"
+echo -e  "$3"  "\tThis is value of \$3" 
+echo -e  "$#"  "\tThis is value of \$#"
+echo -e  "$*"  "\tThis is value of \$*"
+echo -e  "$@"  "\tThis is value of \$@"
+echo -e  "$$"  "\tThis is value of \$\$"
+echo -e  "$?"  "\tThis is value of \$?"
+ls  /xxx
+echo -e  "$?"  "\tThis is value of \$?"
+ 
+［root@qianyun 02_example]# ./02.sh   -a  -b -not  --help  -cd --file
+./02.sh 	This is value of $0
+-a 	This is value of $1
+-b 	This is value of $2
+-not 	This is value of $3
+6 	This is value of $#
+-a -b -not --help -cd --file 	This is value of $*
+-a -b -not --help -cd --file 	This is value of $@
+29952 	This is value of $$
+0 	This is value of $?
+ls: 无法访问/xxx: 没有那个文件或目录
+2 	This is value of $?
+
+
+关于返回值 $?
+0 为真 ，即当前的命令执行成功。
+非0 为假， 即当前 的命令执行不成功。
+
+示例：
+[root@localhost shell]# ls 
+1.sh  2.sh  example.sh
+[root@localhost shell]# echo $?
+0
+[root@localhost shell]# ls +
+ls: 无法访问+: 没有那个文件或目录
+[root@localhost shell]# echo $?
+2
+
+------------------------------------------------------------------------------------------------------ 
+3. 从标准输入（文件或键盘交互输入）获取变量的值
+[root@teacher ~]# read a
+123456
+[root@teacher ~]# echo $a
+123456
+
+ [root@localhost shell]# echo "test" > 1.txt
+[root@localhost shell]# read b <1.txt
+[root@localhost shell]# echo $b
+test
+
+-p ： 输出提示字符串
+[root@teacher ~]# read -p "Please input passwd ： " pw
+ 
+-s ：输入过程中终端不回显(即不显示输入结果）
+[root@teacher ~]# read -s -p "Please input passwd: " pw
+ 
+-t ：输入等待的超时时间
+[root@teacher ~]# read -t 10 -s -p "Please input passwd: " pw
+ 
+-n ： 限制输入n个字符为变量值
+[root@localhost shell]# read -n 5 test
+
+
+-d ： 定义输入结束符，比如： 
+[root@localhost shell]# read -d + ab
+qwerty＋
+[root@localhost shell]# echo $ab
+qwerty
+
+------------------------------------------------------------------------------------------------------ 
+4. 输入输出重定向
+0  stdin
+1  stdout
+2  stderr
+ 
+输出重定向
+>   >>
+2> 2>>
+2>&1
+&> 
+
+重定向到特殊设备
+> /dev/null
+> /dev/stdout 
+> /dev/stdin 
+> /dev/pts/4
+
+输入重定向 
+<  <<
+
+使用技巧： 用cat命令和<<配合输出一个格式化到文本内容到屏幕或文件，EOF是指定的自定义结束符。
+
+输出到屏幕：
+
+[root@qianyun 02_example]# cat <<EOF
+> xuehao   xingming    fenshu
+> 1        zhangsan    90
+> 2        lisi        100
+> EOF
+
+输出到文件
+cat  <<EOF>log.txt
+1     LOG FILE HEADER
+2     this is a test log file
+EOF
+
+
+或者 cat > log.txt <<EOF
+ 
+ 
+tee  输出重定向的命令
+-a, --append
+-i　忽略中断信号
+
+
+与> 和>>不同的是，tee是进行复制传递，　即可以输出到屏幕，同时输出到文件或管道。
+ 
+If a FILE is -, copy again to standard output
+
+[root@localhost shell]# grep "root" /etc/passwd |tee 1.txt
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+[root@localhost shell]# cat 1.txt 
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+
+
+ 
+[root@LEP01 ~]# grep "root" /etc/passwd |tee -
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+ 
+[root@LEP01 ~]# grep "root" /etc/passwd |tee -a 1.txt
+ 
+[root@LEP01 ~]# grep "root" /etc/passwd |tee $SSH_TTY |wc -l
+root:x:0:0:root:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+ 2
+
+
+ [root@LEP01 ~]#cat a* |tee -a out.txt | cat -n
+
+

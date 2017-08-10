@@ -1,0 +1,28 @@
+1.使用sed处理以下js脚本，使其变成紧凑的代码。(变成一行，并去掉所有空格) 
+
+cat sample.js
+functionsign_out()
+{			
+
+$("#loading").show();
+$.get("log_in",{logout:"True"},
+
+function () {
+	window.location="";
+
+		});
+
+}
+
+[root@qianyun sed_exercise]# sed  -r  ':label;N;s/(^$|[[:space:]]+)//g;b label' sample.js 
+
+
+2. 写一个脚本，找出/usr/share/dict/words文件中的所有的回文字符（形如wow peep stats）
+
+提示：
+[demo@teacher ~]$ cat wow.txt |sed -n  '/^\(.\)\(.\)\2\1$/p'
+cooc
+[demo@teacher ~]$ cat wow.txt |sed -n  '/^\(.\)\(.\)\1$/p'
+wow
+xix
+

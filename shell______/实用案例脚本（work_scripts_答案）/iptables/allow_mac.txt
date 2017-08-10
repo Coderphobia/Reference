@@ -1,0 +1,5 @@
+# name     mac address
+kezhenzhe	48:5b:39:b2:50:ca
+wuguihong    6c:62:6d:a4:03:39
+chenzhangan  b0:83:fe:b0:96:d3
+zhangzisheng    b0:83:fe:b0:ab:f1

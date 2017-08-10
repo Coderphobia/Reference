@@ -1,0 +1,70 @@
+１　对test01.txt素材的内容做过滤的操作：
+
+
+用 grep 实现
+  1.   Print all lines containing the string San.
+
+
+  2.   Print all lines where the person's first name starts with J.
+
+
+  3.   Print all lines ending in 700.
+[root@qianyun 05_example]# cat test01.txt |grep '700$'
+
+
+  4.   Print all lines that don't contain 834.
+
+[root@qianyun 05_example]# grep -v "834"  test01.txt 
+
+
+  5.   Print all lines where birthdays are in December(12). 
+[root@qianyun 05_example]# grep ':12/'  test01.txt
+
+       Print all lines where birthdays are in Nov (11) or Dec (12)
+
+[root@qianyun 05_example]# grep ':1[12]/'  test01.txt 
+
+	Print all lines where birthdays are in Sep (9) or Oct (10)
+
+[root@qianyun 05_example]# grep -e  ':9/' -e ':10/'  test01.txt
+
+[root@qianyun 05_example]# grep -E  ':(9|10)/'  test01.txt 
+
+
+  6.   Print all lines where the phone number is in the 408 area code.
+ [root@qianyun 05_example]# grep  ":408-"  test01.txt
+
+  7.   Print all lines containing an uppercase letter, followed by four
+       lowercase letters, a comma, a space, and one uppercase letter.
+
+[root@qianyun 05_example]# grep '[A-Z][a-z]\{4\},\ [A-Z]'  test01.txt   
+ 出现4次
+
+  8.   Print lines where the last name begins with K or k.
+[root@qianyun 05_example]# grep -i  '^[a-z]\{1,\}\ k'  test01.txt 
+or
+[root@qianyun 05_example]# grep -Ei  '^[a-z]+\ k'  test01.txt
+
+  9.   Print lines preceded by a line number where the salary is a
+       six-figure number.
+ [root@qianyun 05_example]# grep  '[0-9]\{6\}$'  test01.txt 
+
+  10.  Print lines containing Lincoln or lincoln (remember that grep is
+       insensitive to case).
+
+　[root@qianyun 05_example]# grep -i "Lincoln"  test01.txt
+
+
+正则表达式的练习
+1： 查找系统字典文件words中长度大于30个字母的单词; (且显示出每个单词的长度)
+[root@qianyun 05_example]# grep -i  '[a-z]\{30,\}'  /usr/share/dict/linux.words 
+
+{30,\}至少出现30次
+[root@qianyun 05_example]# echo -n "dichlorodiphenyltrichloroethane" |wc -m
+31
+[root@qianyun 05_example]# echo -n "pneumonoultramicroscopicsilicovolcanoconiosis" |wc -m
+45
+
+2： 找出words文件中的i18n (以i开头n结尾，中间有18个字母的单词）;
+
+[root@qianyun 05_example]# grep -i  '^i[a-z]\{18\}n$'  /usr/share/dict/linux.words 

@@ -1,0 +1,64 @@
+对sed01.txt作如下操作：
+用 sed 实现
+      1. Change the name Jon to Jonathan.
+
+[root@qianyun sed_exercise]# sed -n  's/Jon/Jonathan/gp'  sed01.txt 
+
+      2. Delete the first three lines.
+
+[root@qianyun sed_exercise]# cat -n  sed01.txt |sed '1,3d'
+
+      3. Print lines 5 through 10.
+
+[root@qianyun sed_exercise]# cat -n  sed01.txt |sed -n '5,10p'
+
+      4. Delete lines containing Lane.
+
+[root@qianyun sed_exercise]# sed '/Lane/d'  sed01.txt 
+
+      5. Print all lines where the birthdays are in November or December.
+
+[root@qianyun sed_exercise]# sed -n '/:1[12]\//p'  sed01.txt 
+
+      6. Append three asterisks to the end of lines starting with Fred.
+
+[root@qianyun sed_exercise]# sed '/^Fred/s/$/& ***/' sed01.txt
+
+       7. Replace the line containing Jose with JOSE HAS RETIRED.
+
+[root@qianyun sed_exercise]# sed '/Jose/c JOSE HAS RETIRED' sed01.txt 
+
+       8. Change Popeye's birthday to 11/14/46. Assume you don't know
+       Popeye's original birthday. Use a regular expression to search for
+       it.
+
+[root@qianyun sed_exercise]# sed -r -n '/Popeye/s#1?[0-9]/[1-3]?[0-9]/[1-9][0-9]#11/14/46#p'  sed01.txt 
+
+or
+
+[kiosk@foundation0 06_example]$ cat sed01.txt |sed -n   '/^Popeye/s/1\{0,1\}[0-9]\/[1-3]\{0,1\}[0-9]\/[1-9][0-9]/11\/14\/64/p'     1\{0，1\}表示月份的十分位1出现0或1。
+      
+ 9. Delete all blank lines.
+
+[root@qianyun sed_exercise]# sed -r  '/^[[:blank:]]*$/d' sed01.txt   *表示多个
+
+       10. Write a sed script that will
+       a. Insert above the first line the title PERSONNEL FILE.
+
+[root@qianyun sed_exercise]# sed '1i PERSONNEL FILE' sed01.txt
+
+       b. Remove the salaries ending in 500.
+
+[root@qianyun sed_exercise]# sed '/500$/d'  sed01.txt 
+
+       c. Print the contents of the file with the last names and first names
+       reversed.
+
+[root@qianyun sed_exercise]# sed 's/^\([A-Z][a-z]\{1,\}\)\(\ \)\([A-Z][a-z]\{1,\}\)/\3\2\1/'  sed01.txt 
+
+
+       d. Append at the end of the file THE END.
+[root@qianyun sed_exercise]# sed '$a END' sed01.txt 
+
+
+

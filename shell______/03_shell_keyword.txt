@@ -1,0 +1,581 @@
+1. 数学运算
+算术运算
+1.[root@LEP01 ~]# expr 1 + 3
+注意数字两边有空格，支持　＋　- \* / %
+ 
+[root@LEP01 ~]# expr 3 - 5
+-2
+ 
+2.[root@LEP01 ~]# echo $((6/3))   常用
+
+3.[root@LEP01 ~]# echo $[5*2]
+ 
+4. [root@LEP01 ~]# let a=5-2;echo $a  最常用
+let a++  ==> let a=a+1
+let a--   ==> let a=a-1
+let a+=2   ==> let a=a+2
+let a-=2  ==> let a=a-2
+ 
+5. [root@LEP01 ~]# declare -i a=5-2;echo $a
+ 
+6.
+[root@LEP01 ~]# bc
+bc 1.06.95
+Copyright 1991-1994, 1997, 1998, 2000, 2004, 2006 Free Software Foundation, Inc.
+This is free software with ABSOLUTELY NO WARRANTY.
+For details type `warranty'. 
+6/3
+2
+6/4
+1
+2-5
+-3
+[root@LEP01 ~]# echo "6+3" |bc
+9
+[root@LEP01 ~]# echo "6.3-3.2" |bc
+3.1
+[root@LEP01 ~]# echo "6.8/2" |bc
+3
+[root@LEP01 ~]# echo "scale=2;6.8/2" |bc
+3.40
+ 
+[root@LEP01 ~]# echo "4>3" |bc  此处有深深的恶意，　与$?的返回值相反。
+1
+[root@LEP01 ~]# echo "3>4" |bc
+0
+ 
+[root@LEP01 ~]# echo "3.21<4.66" |bc
+1
+[root@LEP01 ~]# echo "3.21>4.66" |bc
+0
+ 
+进制转换：
+#!/ｂｉｎ/ｂａｓｈ
+no=100
+echo "obase=2;$no" |bc
+ 
+no=1100100
+echo "obase=10;ibase=2;$no" |bc
+ 
+计算平方以平方根：
+echo "sqrt(100)" | bc 
+echo "10^10" |bc
+
+-----------------------------------------------------------------------------------------
+2. 获取时间
+date
+date +%s
+date --date "2013-08-17 09:10:11" +%s
+date -d "@1279592730"
+date -d "1970-01-01 utc 1279592730 seconds"
+date -d "1970-01-01 14781 days" "+%Y/%m/%d"
+date --date "Jan 20 2009" +%A
+date 
+date -s "2013/12/11 11:22:33"
+ 
+练习：写个脚本统计一组命令执行所花费的时间。
+ 
+sleep n
+在脚本的中加入sleep n 表示脚本执行过程中暂停n秒。
+ 
+#!/bin/bash
+while true
+        do
+                echo -n "A "
+                sleep 1
+        done
+注意这个脚本在执行过程中，有sleep和没有sleep的cpu占用的区别。
+
+-----------------------------------------------------------------------------------------
+3. 函数
+定义
+fun ()
+{
+    statements;
+}
+引用
+ fun
+导出
+export -f fun
+
+示例：
+＃!/bin/bash
+# 这一个脚本演示了函数的使用场景。
+# 写一个脚本，让用户输入用户名，如果输入匹配到了内置的用户名，就输出yes和用户名，如果不匹配，就报错，并输出当前的工作路径。
+
+read -p  "Please input your name : "  username
+case   $username in
+        root)
+          echo "YES"
+          echo "$username"
+          ;;
+        zhangsan)
+          echo "YES"
+          echo "$username"
+          ;;
+        lisi)
+          echo "YES"
+          echo "$username"
+          ;;
+        *)
+          echo "NO"
+          echo "$PWD"
+esac
+
+在脚本中，echo在匹配到用户名后重复了很多的代码，用函数改进一下：
+
+fun1(){
+        echo "YES"
+        echo "$username"
+}
+fun2(){
+        echo "NO"
+        echo "$PWD"
+}
+
+read -p  "Please input your name : "  username
+case   $username in
+        root)
+           fun1
+          ;;
+        zhangsan)
+           fun1
+          ;;
+        lisi)
+           fun1
+          ;;
+        *)
+        fun2
+esac
+
+
+
+
+
+ -----------------------------------------------------------------------------------------
+4. 命令执行
+$ cmd1 | cmd2| cmd3　　　管道
+
+在执行命令的时候打开一个新的子进程：
+$ (cmd)
+
+
+例：
+pwd ; cd /bin ; ls ; pwd
+cd - 
+pwd;(cd /bin; ls);pwd
+ 
+ 
+$ cmd_output=`commands`　
+$ cmd_output=$(ls |cat -n)
+后面的命令先执行；建议使用cmd_output=$(commands), 常用于与date命令配合，获得当前的时间。
+
+$ cmd1;cmd2;cmd3　前一个命令执行完，就执行后面一个。　
+$ cmd1 && cmd2 前一个命令执行成功，才执行后一个。
+$ cmd1 || cmd2 前一个命令执行不成功，才执行后一个。
+ 
+ -----------------------------------------------------------------------------------------
+5.流程控制
+流程控制
+ 
+1.判断
+test
+[root@teacher ~]# test -d /etc
+[root@teacher ~]# echo $?
+0
+[root@teacher ~]# test -d /etccc
+[root@teacher ~]# echo $?
+1
+[root@teacher ~]# test -d /etc && echo "directory"
+directory
+[root@teacher ~]# test -d /etccc && echo "directory"
+ 
+[root@teacher ~]# test -d /etccc || echo "Not directory"
+Not directory
+ 
+[root@teacher ~]# path=/etc
+[root@teacher ~]# test -d "$path" && echo "dir" || echo "Not dir" 
+dir
+[root@teacher ~]# path=/etccc
+[root@teacher ~]# test -d "$path" && echo "dir" || echo "Not dir"
+Not dir
+[root@teacher ~]# test -d "$path" || echo "Not dir" && echo "dir"
+这是错误的写法，存在逻辑问题。
+
+ps：如果判断条件成立的，要执行就用&&,如果条件不成立，就用|| 
+
+[root@teacher ~]# [ -d "$path" ] || echo "Not dir"   推荐使用[   ]来替代test命令，使用代码更加易读。
+Not dir
+注意 [ 空格 -d "$var" 空格 ] 
+ 
+文件类型的检测
+-e -f -d -b -c -S -P -L
+文件属性的检测
+-s -r -w -x -u -g -k 
+文件比较
+-nt -ot -ef
+整数的运算比较
+-eq  -ne  -gt -lt  -ge -le  
+变量检测
+-z  -n   =  !=
+多重判断条件的连接
+-a -o !
+
+解释：
+文件类型的判断
+-e   是否存在
+-d   是否目录
+-f   是否文件
+-b   是否块设备
+-c   是否字符设备
+-S   是否socket
+-P   是否管道文件
+-L   是否链接文件
+
+文件属性的判断
+-s   文件大小大于0 
+-r   是否具有ｒ权限
+-w   是否具有w权限
+-x   是否具有x权限
+-u   是否设置了suid
+-g   是否设置了sgid
+-k   是否设置了ｔ位
+
+文件比较
+-nt  前一个文件比后一个文件新
+-ot  前比后旧
+-ef  有相同的设备和ｉｎｏｄｅ号
+
+整数运算的比较
+-eq   两个数值相等
+-ne   不相等
+-gt   前比后大
+-lt   前比后小
+-ge   大于等于
+-le   小于等于
+
+变量检测
+-z   变量为空
+-n   变量不为空
+=    变量等于某个值
+!=   变量不等于某个值
+
+多重判断的连接。
+-a 两个条件同时成立
+-o 两个条件满足一个即可
+! 条件取反
+
+练习：
+1) 使用$1,判断$1文件类型（是目录还是文件）。　使用脚本写一个类似file的命令。
+#!/bin/bash
+errnumber=21
+
+[ ! -e "$1" ] && echo "Not exsit." && exit  $errnumber
+[ -d "$1" ] && echo "Directory."
+[ -f "$1" ] && echo "file."
+[ -e "$1" -a ! -d "$1" -a ! -f "$1" ] && echo "This file exsit,But I don't know."
+
+执行时的命令为  sh test.sh  +文件或目录名    如：[root@lnxsrv2 shell]# sh test.sh  /etc
+
+2) 判断输入的字符类型（字符，奇数，偶数）？
+#!/bin/bash
+char(){
+        echo "it is a char"
+        exit
+}
+
+read -p  "please INPUT:"   a
+[ $a  -gt   0 ] 2>/dev/null  || char  如果$a小于0的话，把它丢掉垃圾桶里面去，并执行char函数
+
+let b=a%2
+
+[ $b -eq  0 ]&& echo "偶数" || echo "奇数"
+
+
+注意：判断是数字还是含有字母的字符串呢。
+
+3) 检查系统的sshd服务看是否正在运行。如果没有运行，则启动。并记录其启动的时间到ssh.log。（可以参考前面的while的例子(或者cron)写成监控脚本）
+
+#!/bin/bash
+
+netstat -nutpl |grep sshd &>/dev/null
+
+if [ "$?" -eq  0  ] ;then
+    echo "ssh already up"
+    exit 21
+else
+    service sshd  start
+    echo "$(date) sshd  restart" >> /tmp/ssh.log
+    echo "ok"
+fi
+
+-------------------------------
+2. 条件判断 
+
+1） if 关键字的用法
+ 
+if 条件表达式 ； then　
+    条件成立时执行的命令
+ｅｌｉｆ　条件表达式二; then
+    条件二成立时执行的命令
+else   
+    不匹配以上条件时执行的命令
+fi
+
+示例：
+#!/bin/bash
+read -p "Please input (Y/N): " yn
+if [ "$yn" = "y" -o "$yn" = "Y" ];then
+        echo "OK"
+elif [ "$yn" = "n" -o "$yn" = "N" ];then
+        echo "exit"
+else
+        echo "sorry"
+fi
+
+
+练习：
+1. 要求输入用户名，如果是root，输出admin，如果是chuyue，那么输出normal,如果是其他的，那么输出user not exist.
+
+#!/bin/bash
+
+read -p "please INPUT your username:" usr
+if [ $usr = "root" ] ;then
+     echo "admin"
+elif [ $usr =  "chuyue" ] ;then
+     echo "normal"
+else
+     echo "user not exist"
+fi
+
+
+
+2. 上面的题再加上要求验证密码，假设root的密码是redhat，chuyue的密码是123456.
+ 
+
+
+一般来说，if只用在只有一到两个条件(加上其他)的判断中，如果条件超过三个，使用case会使代码的结构更清晰。
+
+2） case 关键字的用法：
+ 
+case  $var　in
+    条件1）
+        条件1成立时执行命令;;
+    条件2）
+        条件2成立时执行命令;;
+    条件3）
+        条件3成立时执行命令;;
+     ...)
+	....;;
+    *）
+        其他情况下执行的命令;;
+esac
+
+示例：
+#!/bin/bash
+read -p "Username: " u
+read -s -p "Password: " p
+echo
+up=$u:$p
+
+case $up in
+        root:123456)
+           echo "administrator."
+           ;;
+        chuyue:654321)
+           echo "welcome user."
+           ;;
+        zhangsan:abcefg)
+           echo "$u"
+           ;;
+        *)
+           echo "who are you ?"
+           ;;
+esac
+
+练习：
+1）自行用shell脚本编写一个命令cmd，当你输入cmd -t的时候，显示当前的时间，-c 显示当前月的日历（cal），-i 显示IP地址，-v 显示命令的版本; -h, 显示命令的帮助文档（cat << EOF）。
+2） 增加点难度，多个选项混合使用呢。（可能要用到循环，后面再写）
+
+
+-------------------------------
+3. 循环语句
+
+1) for 关键字
+
+    ｆｏｒ　变量 in 循环体
+        do
+            命令
+        done
+
+循环体可以是多个字符串，连续的数值，文本的每一行，命令的结果的标准输出等。
+
+示例：
+#!/bin/bash
+for i in {1..10}
+        do
+           echo $i
+        done
+
+示例：
+#!/bin/bash
+for ((i=10;i>=0;i--))
+        do
+           echo $i
+           sleep 1
+        done
+
+2）while 关键字
+ while 条件成立时
+        do    
+            命令
+        done
+        
+示例：        
+#!/bin/bash
+i=10
+while [ "$i" -ge 0 ] 
+        do
+                echo "$i"
+                let i--
+        done
+
+可以使用 ：或 true 或 ［ 1 －gt 0 ］等条件形成死循环。写永久循环脚本时注意脚本的暂停（sleep）
+
+3）until 关键字
+    until 条件不成立时
+        ｄｏ
+            命令
+        done
+
+示例：
+#!/bin/bash
+echo -n "倒计时："
+tput sc
+ 
+i=10
+until [ $i -eq 0 ]
+        do
+                tput rc
+                tput ed
+                echo -n  $i
+                let i--
+                sleep 1
+        done
+echo
+
+练习： 
+1）批量添加n个用户，user1...user10,密码统一为123456
+2）批量添加N个用户，用户名不规则，来自于文件username.txt，密码呢为随机字符串(要记录用户名对应的密码);（mkpasswd）
+3）要求用户输入用户名，如果不输入正确，要求再次输入，重试次数为3次;
+4）用*号打印出一个三角形：（打印99乘法表）
+*
+**
+***
+****
+*****
+
+*****
+****
+***
+**
+*
+
+    *
+   **
+  ***
+ ****
+*****
+
+*****
+ ****
+  ***
+   **
+    *
+
+    *
+   * *
+ * * * *
+* * * * *
+
+
+    *
+   * *
+ * * * *
+* * * * *
+ * * * *
+  * * *
+   * *
+    *
+5）自动给shells目录下的*.sh文件增加x权限（新建时自动增加，旧文件若没有也自动补加）。
+
+-------------------------------------
+4）select关键字
+select
+    select 变量  in  多个变量值
+        do
+            命令
+        done
+        
+示例：        
+#!/bin/bash
+select i in  ls pwd free
+        do
+                $i
+        done
+
+最常用在和case进行配合。
+
+5）中断  break  continue
+
+示例：
+#!/bin/bash
+for i in {1..10}
+        do
+                echo "$i"
+                [ $i -eq 5 ] && break
+        done
+ 示例：
+#!/bin/bash
+for i in {1..10}
+        do
+                [ $i -eq 5 ] && continue
+                echo "$i"
+        done
+ 
+6）shift 关键字
+拿掉脚本的参数
+示例：
+#!/bin/bash
+until [ $# -le 0 ]
+        do
+                echo "The frist arg:  $1 counts: $#"
+                shift 1
+        done
+        
+练习：
+1）求1到100的和，平方值，奇数和，偶数和？
+2）查看本网段哪些IP正在使用？
+3）自动查找某目录中超过30天没有修改的文件，把它找出来并删除，记录操作日志。
+3) 为某个目录下的文件自动添加可执行的权限。
+
+4）假如现在有个文本，格式如下：提示 # 提取数字awk  '{print $2}' 1.txt
+
+a  1
+b  3
+c  2
+d  7
+b  5
+a  3 
+g  2
+f  6
+d  9
+即左边是随机字母，右边是随机数字，要求写个脚本使其输出格式为：
+a  4
+b  8
+c  2
+d  16
+f  6
+g  2
+
+即将相同的字母后面的数字加在一起，按字母的顺序输出。        

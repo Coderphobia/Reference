@@ -1,0 +1,146 @@
+
+清理普通用户
+
+for i in $(awk -F':' '$3 > 500 && $NF ~ /bash$/ {print $1}' /etc/passwd); do userdel $i ;done
+
+
+根据需求列出对应内容
+awk -F':' 'BEGIN {print "--------------------"RS"user\tpasswd\thome"} {print $1,$2,$6} END {print "----------end---------"}'
+
+
+ifconfig br0|grep broad |awk '{print $2 }'
+
+awk -F':|/' '{print $11}' /opt/passwd		----匹配多个分割符
+使用正则表达式匹配
+awk '/^[rR]oo[tT]/ {print $0}' /opt/passwd 
+root:x:0:0:root:/root:/bin/bash
+RooT:x:0:0:root:/root:/bin/bash
+
+awk -F':' '$2!="x" {print $1}' /opt/passwd 	----匹配非x列的行
+
+
+awk -F':' '{if($3>=1000) print $0}' /etc/passwd
+nfsnobody:x:65534:65534:Anonymous NFS User:/var/lib/nfs:/sbin/nologin
+kiosk:x:1000:1000:kiosk:/home/kiosk:/bin/bash
+u01:x:1001:1001::/home/u01:/bin/bash
+
+ awk -F':' '{if($3<=5) print $1,$3,"这是root用户";else print $1,"这是普通用户"}' /etc/passwd		----条件匹配
+
+
+awk -F':' '{if($3<=5) print $1,$3,"这是root用户";else if ($3<=500) print $1,"这是系统用户" ;else print $1,"这是普通用户"}' /etc/passwd
+
+
+netstat -tnpl|awk -F':+| +|/' 'BEGIN {print"**************************"RS"协议\t端口号\t状态\tPID\t进程名称"} NR>=3 {print $1"\t"$5"\t"$8"\t"$9"\t"$10} END {print"*****************end******************"}'
+
+**************************
+协议	端口号	状态	PID	进程名称
+tcp	139	LISTEN	908	smbd
+tcp	5900	LISTEN	2429	qemu-kvm
+tcp	111	LISTEN	726	rpcbind
+tcp	20048	LISTEN	814	rpc.mountd
+tcp	8307	LISTEN	1509	vmware-hostd
+tcp	53	LISTEN	2370	dnsmasq
+tcp	53	LISTEN	2325	dnsmasq
+tcp	53	LISTEN	971	named
+tcp	53	LISTEN	971	named
+tcp	53	LISTEN	971	named
+tcp	5910	LISTEN	3186	vino-server
+tcp	22	LISTEN	698	sshd
+tcp	953	LISTEN	971	named
+tcp	25	LISTEN	1101	master
+tcp	442	LISTEN	1509	vmware-hostd
+tcp	445	LISTEN	908	smbd
+*****************end******************
+
+---------------------------------------------------------------------------------
+
+
+
+监控脚本
+
+
+http：
+
+
+#通过锁文件、主进程号、网页浏览测试
+#1、每隔10秒检查httpd服务是否正常
+#2、如果不正常先恢复服务再发信息告知管理员
+#               3、再过三秒再次检测服务恢复是否成功，
+#                  如果成功再向管理报告服务已经恢复
+#                  如果恢复失败向管理员报告恢复失败，需要上线手工恢复
+
+#!/bin/bash
+
+check_http(){
+
+pid=`cat /run/httpd/httpd.pid`
+server_ip=172.25.254.250
+
+ps -p $pid |grep $pid &> /dev/null
+RHEL1=$?
+http_out=$(elinks -dump http://$server_ip/ok.html|grep -o ok)
+RHEL2=$?
+        if [ $RHEL1 -eq 0 ] && [ "$http_out" == "ok" ]
+        then
+         export QQ=0
+        else
+        export QQ=1
+        fi
+}
+
+ok_send(){
+        echo "httpd recovery is ok" |mail -s "check_http mail" root@localhost
+}
+bad_send(){
+        echo "httpd recovery is bad" |mail -s "check_http bad mail " root@localhost
+}
+
+down_send(){
+        echo "httpd is down" |mail -s "check_http down" root@localhsot
+}
+
+        check_http
+
+if [ $QQ -eq 0 ]
+then
+        :
+else
+        systemctl restart httpd &> /dev/null
+
+                down_send
+        sleep 5
+
+                check_http
+        if [ $QQ -eq 0 ]
+        then
+                ok_send
+         else
+                bad_send
+        fi
+
+fi
+
+-----------------------------------
+while 循环监控：
+
+vim while.sh
+
+#!/bin/bash
+
+
+
+while true
+do
+        . ./monhttpd_fun.sh
+        sleep 10s
+done
+
+
+vim while.sh
+
+监控ftp	、写备份web脚本（把当前内容进行备份，把3天之前的所有备份删掉）
+
+写备份web脚本（把当前内容进行备份，把3天之前的所有备份>
+删掉）
+
+

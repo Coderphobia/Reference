@@ -1,0 +1,99 @@
+对sed02.txt 作如下操作。
+
+1，	删除文件每行的第一个非空字符。
+[root@qianyun sed_exercise]# sed 's/^\([[:blank:]]*\)\([a-z]\)/\1/' sed02.txt 
+
+2，	删除文件每行的第二个非空字符。
+
+[root@qianyun sed_exercise]# sed 's/^\([[:blank:]]*\)\([a-z]\)\([a-z]\)/\1\2/' sed02.txt 
+
+
+
+3，	删除文件每行的最后一个字符。
+
+[root@qianyun sed_exercise]# sed 's/.$//' sed02.txt
+
+
+4，	删除文件每行的倒数第二个字符。
+
+[root@qianyun sed_exercise]# sed 's/\(.\)\(.$\)/\2/' sed02.txt
+
+
+5，	删除文件每行的第二个单词。 
+
+[root@qianyun sed_exercise]# sed 's/^\([[:blank:]]*\)\([A-Za-z]\{1,\}:\)\([A-Za-z]\{1,\}\)/\1\2/' sed02.txt
+
+or
+
+[root@foundation0 sed_exercise]# sed  's/\([A-Za-z]\{1,\}\)\(:.*:\)\([A-Za-z]\{1,\}\)/\1\2/' sed02.txt
+
+6，	删除文件每行的倒数第二个单词。
+
+[root@qianyun sed_exercise]# sed 's/\([A-Za-z]\{1,\}\)\(\/[A-Za-z]\{1,\}$\)/\2/' sed02.txt 
+
+
+7，	删除文件每行的最后一个单词。 
+
+[root@qianyun sed_exercise]# sed 's/[A-Za-z]\{1,\}$//' sed02.txt 
+
+
+8，	交换每行的第一个字符和第二个字符。
+
+[root@qianyun sed_exercise]# sed 's/^\([[:blank:]]*\)\([a-z]\)\([a-z]\)/\1\3\2/' sed02.txt 
+
+
+
+9，	交换每行的第一个字符和第二个单词。 
+
+[root@qianyun sed_exercise]# sed 's/^\([[:blank:]]*\)\([a-zA-Z]\)\([a-zA-Z]*:\)\([a-z]\{1,\}\)/\1\4\3\2/' sed02.txt
+
+[root@foundation0 sed_exercise]# sed  's/\([A-Za-z]\)\(.\{1,\}:\)\([A-Za-z]\{1,\}\)/\3\2\1/'    sed02.txt 
+
+
+10，交换每行的第一个单词和最后一个单词。
+
+[root@qianyun sed_exercise]# sed 's/^\([[:blank:]]*\)\([a-zA-Z]\{1,\}\)\(:.*\/\)\([a-zA-Z]\{1,\}$\)/\1\4\3\2/' sed02.txt 
+
+
+11，删除一个文件中所有的数字。
+
+[root@qianyun sed_exercise]# sed 's/[0-9]//g' sed02.txt 
+
+12，删除每行开头的所有空格。 
+
+[root@qianyun sed_exercise]# sed 's/^[[:blank:]]*//'  sed02.txt
+  
+13，用制表符替换文件中出现的所有空格。
+
+[root@qianyun sed_exercise]# sed 's/\ /\t/g'  sed02.txt 
+
+14，把所有大写字母用括号（）括起来。
+
+[root@qianyun sed_exercise]# sed 's/[A-Z]/(&)/g'  sed02.txt 
+
+15，打印每行3次。  
+[root@qianyun sed_exercise]# sed -e  'p;p'  sed02.txt
+
+or
+
+[root@server192 11-16]# cat sed01.txt |sed 's/^..*$/&\n&\n&/'
+
+16，只显示每行的第一个单词。
+
+[root@qianyun sed_exercise]# sed 's/^\([[:blank:]]*\)\([a-zA-Z]\{1,\}\)\(:.*\)/\2/' sed02.txt
+
+17，打印每行的第一个单词和第三个单词。
+
+[root@qianyun sed_exercise]# sed  's/^\([[:blank:]]*\)\([a-zA-Z]\{1,\}\)\([^a-zA-Z]\{1,\}\)\([a-zA-Z]\{1,\}\)\([^a-zA-Z]\{1,\}\)\([a-zA-Z]\{1,\}\)\(.*$\)/\2    \6/' sed02.txt 
+
+16，将格式为    mm/yy/dd    的日期格式换成   mm；yy；dd  
+[root@server192 11-16]# date "+%m/%y/%d" |sed 's/\//;/g'
+11;11;17
+[root@server192 11-16]# date "+%m/%y/%d" |sed 's#/#;#g'
+11;11;17
+[root@server192 11-16]# date "+%m/%y/%d" |sed 's@/@;@g'
+11;11;17
+[root@server192 11-16]# date "+%m/%y/%d" |sed 's:/:;:g'
+11;11;17
+[root@server192 11-16]# date "+%m/%y/%d" |sed 's!/!;!g'
+
